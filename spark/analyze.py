@@ -9,12 +9,13 @@ from pyspark.sql import SQLContext
 
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk.tokenize import word_tokenize
 
 def process(x):
     sid = SentimentIntensityAnalyzer()
     ss = sid.polarity_scores(x["body"])
 
-    return (ss["neg"], ss["neu"], ss["pos"], ss["compound"], x["created_utc"], x["subreddit"])
+    return (ss["neg"], ss["neu"], ss["pos"], ss["compound"], x["score"], x["gilded"], x["controversiality"], x["subreddit"], x["created_utc"], len(x["body"]))
 
 sc = pyspark.SparkContext()
 
@@ -33,7 +34,7 @@ conf = {
     'mapred.bq.temp.gcs.path': input_directory,
     'mapred.bq.input.project.id': 'cs216-199722',
     'mapred.bq.input.dataset.id': 'reddit_political_sentiments',
-    'mapred.bq.input.table.id': 'test_table',
+    #'mapred.bq.input.table.id': 'test_table',
     'mapred.bq.input.table.id': 'merged_tables'
 }
 
@@ -45,44 +46,27 @@ table_data = sc.newAPIHadoopRDD(
     conf=conf)
 
 #Map through data
-overall_sentiments = (
-    table_data
-    .map(lambda record: process(json.loads(record[1]))))
+overall_sentiments = table_data.map(lambda record: process(json.loads(record[1])))
 
-#Act on data
+#Perform word count
+word_counts = table_data.flatMap(lambda line: word_tokenize(json.loads(line[1])["body"])) \
+                .map(lambda word: (word, 1)) \
+                .reduceByKey(lambda a, b: a + b)
+
+#Act on data and display 10 results from each for debugging
 pprint.pprint(overall_sentiments.take(10))
-
-
-# Display 10 results from each for debugging
-pprint.pprint(overall_sentiments.take(10))
-# pprint.pprint(entity_sentiments.take(10))
+pprint.pprint(word_counts.take(10))
 
 # Stage data formatted as newline-delimited JSON in Cloud Storage.
-output_directory = 'gs://{}/hadoop/tmp/bigquery/pyspark_output'.format(bucket)
-output_files = output_directory + '/part-*' 
-
-# Output Parameters.
-output_dataset = 'reddit_political_sentiments'
-output_table = 'sentiment_analysis'
+sentiment_output_directory = 'gs://{}/hadoop/tmp/bigquery/pyspark_output/sentiment'.format(bucket)
+count_output_directory = 'gs://{}/hadoop/tmp/bigquery/pyspark_output/wordcount'.format(bucket)
 
 sql_context = SQLContext(sc)
+
 (overall_sentiments
-.toDF(['neg', 'neu', 'pos', 'compound', 'created_utc', 'subreddit'])
-.write.format('json').save(output_directory)) 
+.toDF(['neg', 'neu', 'pos', 'compound', 'score', 'gilded', 'controversiality', 'subreddit', 'created_utc', 'comment_length'])
+.write.format('json').save(sentiment_output_directory))
 
-# Shell out to bq CLI to perform BigQuery import.
-subprocess.check_call(
-    'bq load --source_format NEWLINE_DELIMITED_JSON '
-    '--replace '
-    '--autodetect '
-    '{dataset}.{table} {files}'.format(
-        dataset=output_dataset, table=output_table, files=output_files
-    ).split())
-
-# Manually clean up the staging_directories, otherwise BigQuery
-# files will remain indefinitely.
-input_path = sc._jvm.org.apache.hadoop.fs.Path(input_directory)
-input_path.getFileSystem(sc._jsc.hadoopConfiguration()).delete(input_path, True)
-output_path = sc._jvm.org.apache.hadoop.fs.Path(output_directory)
-output_path.getFileSystem(sc._jsc.hadoopConfiguration()).delete(
-    output_path, True)  
+(word_counts    
+.toDF(['word', 'count'])
+.write.format('json').save(count_output_directory))
