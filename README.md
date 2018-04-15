@@ -6,6 +6,59 @@ Table of Contents
       * [Comment Generator](#comment-generator)
          * [Notable Results (LANGAUGE WARNING)](#notable-results-langauge-warning)
 
+## Problem Description
+
+The topics of political polarizaiton, party identity, and the power of online communities have become very hot with the last election. This project, done for CS216 - Everything Data, attempts to explore Reddit comments in different idealogical commmunities over time.
+
+Reddit was our community of choice to examine. For those who don't understand what Reddit is, here is their [Frequently Asked Questions](https://www.reddit.com/wiki/faq) page. The basic premise of the website is that users can submit links which other users can like or dislike (called upvoting or downvoting) and can comment on. There are different groups, called subreddits, which serve as a hub to post and discuss a topic (like "politics").
+
+The communities we decided to explore were The_Donald, SandersForPresident, hillaryclinton, worldnews, and politics. The general user for Reddit is a college-aged white American male ([source)](http://response.agency/blog/2014/02/reddit-demographics-and-user-surveys/) and the site generally tends to skew liberal (the popularity of SandersForPresident, hillaryclinton, and arguably politics shows this). However, different subreddits can be in the completely ideaological opposite. The most notorious is [The_Donald](https://en.wikipedia.org/wiki//r/The_Donald) which has attracted large amounts of negative attention. worldnews is believed to be more conservative as well (though definitely not to the same extreme). 
+
+There is a huge BigQuery table which has all the comments posted on Reddit from 2005-2017 [link](https://bigquery.cloud.google.com/dataset/fh-bigquery:reddit_comments). While it would be very interesting to examine _all_ then comments from these communities, the size of the processing issue would be astronomical. Thus, we decided to examine comments from these subreddits in October of 2015, 2016, and 2017. 
+
+The question we wanted to ask were: What does an average comment of this community look like? Have comments gotten more positive/negative/neutral over time? Have they gotten more polarizing?
+
+## Team Members and Roles
+
+Brian Jiang - Data Analysis
+
+Tatiana Tian - Data Visualization + Presentation
+
+Torrance Yang - Wrote all of the code in this repository
+
+## Data Gathering and Cleaning
+
+Luckily scraping the data has already been done for us, but it needed to be cleaned. This is done mostly in the SQL query to merge the comments from the three months we picked from the subreddits we chose. 
+
+### The Problem
+
+A lot of comments get removed or deleted so there are a lot of comments which show up as `<deleted>` or `<removed>.` Similarly, if a comment violates a subreddit rules, a bot may remove the message and leave a comment. These comments are useless for our examination, so they must be removed as well. 
+
+### The Solution
+
+There's a table within the public BigQuery table called `bots_201505` which contains the names of accounts which belong to bots, the most known of which is **AutoModerator**. The rest of the problems can be resolved uing plain SQL which can be found in `local/setup_new_table.py`. 
+
+This file created a new table within our BigQuery console called `merged_tables` with around 9 million comments.
+
+## Data Processing
+
+Our idea was to do an sentiment and entity analysis on all these comments. Sentiment allows us to view how positive/negative/neutral/polarizing a comment is, and an entity analysis would let us see what subjects comments are talking about. 
+
+So, how do we process 9 million comments in a reasonable amount of time? In trying to solve this, we had to overcome a number of barriers. We eventually found out the power of Google Cloud since we were already using BigQuery. There's a service called Dataproc which allows us to easily spin up a [Apache Spark](https://spark.apache.org/) cluster which can help us parallelize and process huge amounts of data efficiently. 
+
+It was a pain to learn how to initialize the cluster, hook it up to BigQuery, save the results to Google Storage, and then insert it back into BigQuery as a new table, but all the code is in `spark`.
+
+### File Description
+
+`analyze.py` does most of the hardwork. Here's an incredibly simple outline of what it does.
+
+1. Connects to our BigQuery table
+2. Processes a row for sentiment analysis
+3. At the same time, looks for certain keywords that matches entities.
+4. Returns a new row with processed data
+5. Repeats until done
+
+
 ## Comment Generator
 
 The files for this are in `/comment_generator/`. 
