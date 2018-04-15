@@ -17,13 +17,13 @@ project = sc._jsc.hadoopConfiguration().get('fs.gs.project.id')
 input_directory = 'gs://{}/hadoop/tmp/bigquery/pyspark_input'.format(bucket)
 
 # Stage data formatted as newline-delimited JSON in Cloud Storage.
-sentiment_output_directory = 'gs://{}/hadoop/tmp/bigquery/pyspark_output/sentiment'.format(bucket)
+sentiment_output_directory = 'gs://{}/hadoop/tmp/bigquery/pyspark_output/analysis'.format(bucket)
 count_output_directory = 'gs://{}/hadoop/tmp/bigquery/pyspark_output/wordcount'.format(bucket)
 
 # Output Parameters.
 output_dataset = 'reddit_political_sentiments'
 
-sentiment_output_table = 'sentiment_analysis_extra'
+sentiment_output_table = 'comment_analysis'
 count_output_table = 'word_count'
 
 # Stage data formatted as newline-delimited JSON in Cloud Storage.

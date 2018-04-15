@@ -19,7 +19,8 @@ dataset = bigquery.Dataset(dataset_ref)
 #dataset = bigquery_client.create_dataset(dataset)
 
 # In the new BigQuery dataset, create a new table.
-table_ref = dataset.table('merged_tables_timestamped')
+table_ref = dataset.table('merged_tables')
+
 # The table needs a schema before it can be created and accept data.
 # Create an ordered list of the columns using SchemaField objects.
 SCHEMA = []
@@ -40,7 +41,9 @@ table = bigquery_client.create_table(table)
 QUERY = """
 SELECT body, author, score, gilded, controversiality, subreddit, created_utc
 FROM `fh-bigquery.reddit_comments.2015_10`
-WHERE subreddit = 'The_Donald' OR subreddit = 'politics' OR subreddit = 'SandersForPresident' OR subreddit = 'hillaryclinton' OR subreddit = 'worldnews'
+WHERE (subreddit = 'The_Donald' OR subreddit = 'politics' OR subreddit = 'SandersForPresident' OR subreddit = 'hillaryclinton' OR subreddit = 'worldnews')
+AND author NOT IN (SELECT author FROM `fh-bigquery.reddit_comments.bots_201505`) #exclude bot accounts
+AND (body<>'[deleted]' AND body<>'[removed]')
 AND body IS NOT NULL
 AND author IS NOT NULL
 AND score IS NOT NULL
@@ -50,7 +53,9 @@ AND subreddit IS NOT NULL
 UNION ALL SELECT 
 body, author, score, gilded, controversiality, subreddit, created_utc
 FROM `fh-bigquery.reddit_comments.2016_10`
-WHERE subreddit = 'The_Donald' OR subreddit = 'politics' OR subreddit = 'SandersForPresident' OR subreddit = 'hillaryclinton' OR subreddit = 'worldnews'
+WHERE (subreddit = 'The_Donald' OR subreddit = 'politics' OR subreddit = 'SandersForPresident' OR subreddit = 'hillaryclinton' OR subreddit = 'worldnews')
+AND author NOT IN (SELECT author FROM `fh-bigquery.reddit_comments.bots_201505`) #exclude bot accounts
+AND (body<>'[deleted]' AND body<>'[removed]')
 AND body IS NOT NULL
 AND author IS NOT NULL
 AND score IS NOT NULL
@@ -60,7 +65,9 @@ AND subreddit IS NOT NULL
 UNION ALL SELECT 
 body, author, score, gilded, controversiality, subreddit, created_utc
 FROM `fh-bigquery.reddit_comments.2017_10`
-WHERE subreddit = 'The_Donald' OR subreddit = 'politics' OR subreddit = 'SandersForPresident' OR subreddit = 'hillaryclinton' OR subreddit = 'worldnews'
+WHERE (subreddit = 'The_Donald' OR subreddit = 'politics' OR subreddit = 'SandersForPresident' OR subreddit = 'hillaryclinton' OR subreddit = 'worldnews')
+AND author NOT IN (SELECT author FROM `fh-bigquery.reddit_comments.bots_201505`) #exclude bot accounts
+AND (body<>'[deleted]' AND body<>'[removed]')
 AND body IS NOT NULL
 AND author IS NOT NULL
 AND score IS NOT NULL
