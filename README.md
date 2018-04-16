@@ -2,9 +2,21 @@
 
 Table of Contents
 =================
-  * [RedditPoliticalAnalysis](#redditpoliticalanalysis)
+
+   * [RedditPoliticalAnalysis](#redditpoliticalanalysis)
+      * [Problem Description](#problem-description)
+      * [Team Members and Roles](#team-members-and-roles)
+      * [Data Gathering and Cleaning](#data-gathering-and-cleaning)
+         * [The Problem](#the-problem)
+         * [The Solution](#the-solution)
+      * [Data Processing](#data-processing)
+         * [File Description](#file-description)
+      * [Data Analysis](#data-analysis)
       * [Comment Generator](#comment-generator)
          * [Notable Results (LANGAUGE WARNING)](#notable-results-langauge-warning)
+      * [Replicating Results](#replicating-results)
+
+
 
 ## Problem Description
 
@@ -14,7 +26,7 @@ Reddit was our community of choice to examine. For those who don't understand wh
 
 The communities we decided to explore were The_Donald, SandersForPresident, hillaryclinton, worldnews, and politics. The general user for Reddit is a college-aged white American male ([source)](http://response.agency/blog/2014/02/reddit-demographics-and-user-surveys/) and the site generally tends to skew liberal (the popularity of SandersForPresident, hillaryclinton, and arguably politics shows this). However, different subreddits can be in the completely ideaological opposite. The most notorious is [The_Donald](https://en.wikipedia.org/wiki//r/The_Donald) which has attracted large amounts of negative attention. worldnews is believed to be more conservative as well (though definitely not to the same extreme). 
 
-There is a huge BigQuery table which has all the comments posted on Reddit from 2005-2017 [link](https://bigquery.cloud.google.com/dataset/fh-bigquery:reddit_comments). While it would be very interesting to examine _all_ then comments from these communities, the size of the processing issue would be astronomical. Thus, we decided to examine comments from these subreddits in October of 2015, 2016, and 2017. 
+There is a huge BigQuery table which has all the comments posted on Reddit from 2005-2017 [link](https://bigquery.cloud.google.com/dataset/fh-bigquery:reddit_comments). While it would be very interesting to examine _all_ then comments from these communities, the size of the processing issue would be astronomical. Thus, we decided to examine comments from these subreddits from the Octobers of 2015, 2016, and 2017. 
 
 The question we wanted to ask were: What does an average comment of this community look like? Have comments gotten more positive/negative/neutral over time? Have they gotten more polarizing?
 
@@ -50,13 +62,57 @@ It was a pain to learn how to initialize the cluster, hook it up to BigQuery, sa
 
 ### File Description
 
-`analyze.py` does most of the hardwork. Here's an incredibly simple outline of what it does.
+`analyze.py` does most of the hardwork. Here's an very simplifed outline of what it does.
 
 1. Connects to our BigQuery table
 2. Processes a row for sentiment analysis
 3. At the same time, looks for certain keywords that matches entities.
 4. Returns a new row with processed data
 5. Repeats until done
+6. Starting back at the beginning, tokenizes and cleans the body of each comment
+7. Inserts back into the RDD the values (word, 1)
+8. Reduces the overall results by summing up the keys (effectively performing a word count)
+9. Saves the RDD's of these two different calculations into JSON files on Google Storage
+
+The output files are in a folder called `dataproc-[cluster-hash]-us/hadoop/tmp/bigquery/pyspark_output`. The results of the first RDD are stored in `.../analysis/` while the rest are stored in `.../wordcount/`.
+
+Then, running the file `create_tables.py` will insert the json files one by one into two separate tables, called `comment_analysis` and `word_count`.
+
+The schema for `comment_analysis` is
+
+```
+Sentiment Analysis Fields (FLOAT)
+===============================
+'neg', 'neu', 'pos', 'compound',
+
+Comment Metadata (INTEGER, INTEGER, FLOAT, STRING, DATE, INTEGER)
+=================================================================================== 
+'score', 'gilded', 'controversiality', 'subreddit', 'created_utc', 'comment_length',
+
+Does Comment Contain Topic Mention (BOOLEAN)
+============================================
+'Trump', 'Hillary', 'Bernie', 'Obama',
+'Abortion', 'Immigration', 'Emails', 'Guns',
+'Wall', 'Healthcare', 'Taxes', 
+'Mexico', 'China', 'Russia', 
+'TrumpTalk'
+
+```
+
+It's not the prettiest way to manage this, but creating multiple tables is a hassle, and this will suffice for our purposes. 
+
+`word_count`'s schema is much simpler. 
+
+```
+count: INTEGER,
+word: STRING
+```
+
+## Data Analysis
+
+The analysis for this data is linked elsewhere as it is was done separate from this repository of code. 
+
+However, something fun we generated strictly from this cleaned data is a comment generator/simulator (described below).
 
 
 ## Comment Generator
@@ -159,3 +215,25 @@ python generate_comments.py -f The_Donald -n 1000
 * I hope you are supposedly being killed?
 * Or are we only know about the amazing achievement of the predatory paedophile problem and murder problem.
 * People know right It's Obama.
+
+## Replicating Results
+
+Due to the nature of the Google Cloud Platform, I'm not sure any of this would work. You'd need to have your own BigQuery datasets for a lot of the Spark jobs to run, and there's a lot of authentication things Google Cloud needs to run that I've already forgotten were. However, I've included a requirements.txt file that should roughly provide the dependencies of the code and some sample command line arguments that run the BigQuery and Spark Jobs.
+
+**Installing local requirements**
+```python
+pip install -r requirements.txt
+```
+
+**Setup Google Cloud**
+
+`gcloud init`
+
+**Setting up Dataproc cluster**
+
+You'll need to upload the `spark/install.sh` file to Google Storage, and then select it as the initialization script when spinning up the cluster
+
+**Sending jobs to cluster**
+
+`gcloud dataproc jobs submit pyspark [file-name] --cluster [cluster-name]
+`
