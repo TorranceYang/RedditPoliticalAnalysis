@@ -62,7 +62,7 @@ It was a pain to learn how to initialize the cluster, hook it up to BigQuery, sa
 
 ### File Description
 
-`analyze.py` does most of the hardwork. Here's an very simplifed outline of what it does.
+`analyze.py` does most of the hard work. Here's an very simplified outline of what it does.
 
 1. Connects to our BigQuery table
 2. Processes a row for sentiment analysis
@@ -163,7 +163,7 @@ optional arguments:
 **Example**
 
 ```sh
-python generate_comments.py -f The_Donald -n 1000
+python generate_comments.py -f The_Donald.txt -n 1000
 ```
 
 ### Notable Results (LANGAUGE WARNING)
