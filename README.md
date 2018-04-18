@@ -85,6 +85,10 @@ Sentiment Analysis Fields (FLOAT)
 ===============================
 'neg', 'neu', 'pos', 'compound',
 
+//What the above numbers mean: 
+//https://stackoverflow.com/questions/40325980/how-is-the-vader-compound-polarity-score-calculated-in-python-nltk
+//http://t-redactyl.io/blog/2017/04/using-vader-to-handle-sentiment-analysis-with-social-media-text.html
+
 Comment Metadata (INTEGER, INTEGER, FLOAT, STRING, DATE, INTEGER)
 =================================================================================== 
 'score', 'gilded', 'controversiality', 'subreddit', 'created_utc', 'comment_length',
