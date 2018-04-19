@@ -118,6 +118,8 @@ The analysis for this data is linked elsewhere as it is was done separate from t
 
 However, something fun we generated strictly from this cleaned data is a comment generator/simulator (described below).
 
+[Here are our findings.](https://imgur.com/Egsey7M)
+
 
 ## Comment Generator
 
