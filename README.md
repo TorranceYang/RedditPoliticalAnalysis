@@ -118,9 +118,9 @@ word: STRING
 
 We've linked a couple different analyses upon this data. The R analysis for this project is included within the r_data_analysis folder.
 
-Somethign fun also did that we generated strictly from this cleaned data is a comment generator/simulator (described in the section below).
+Something fun also did that we generated strictly from this cleaned data is a comment generator/simulator (described in the section below).
 
-![Here are our findings.](https://imgur.com/Egsey7M)
+![Here are our findings.](https://i.imgur.com/Egsey7M.jpg)
 
 In addition, based on our findings from R, we found a great deal of quantitative support behind what causes certain comments to be popular or polarizing. Listed below are some of our most notable findings. The accompanying graphs for these results can be found in the r_data_analysis folder. 
 
