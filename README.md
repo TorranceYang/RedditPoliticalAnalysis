@@ -36,7 +36,7 @@ Brian Jiang - Data Analysis
 
 Tatiana Tian - Data Visualization + Presentation
 
-Torrance Yang - Wrote all of the code in this repository
+Torrance Yang - Wrote all of the code in this repository except the R code
 
 ## Data Gathering and Cleaning
 
@@ -101,6 +101,8 @@ Does Comment Contain Topic Mention (BOOLEAN)
 'Mexico', 'China', 'Russia', 
 'TrumpTalk'
 
+//Trump talk is a series of words that Trump supporters like to use, i.e. MAGA, centipede, cuck, etc
+
 ```
 
 It's not the prettiest way to manage this, but creating multiple tables is a hassle, and this will suffice for our purposes. 
@@ -114,11 +116,11 @@ word: STRING
 
 ## Data Analysis
 
-The analysis for this data is linked elsewhere as it is was done separate from this repository of code. The R analysis for this project is included within the r_data_analysis folder. 
+We've linked a couple different analyses upon this data. The R analysis for this project is included within the r_data_analysis folder.
 
-However, something fun we generated strictly from this cleaned data is a comment generator/simulator (described below).
+Somethign fun also did that we generated strictly from this cleaned data is a comment generator/simulator (described in the section below).
 
-[Here are our findings.](https://imgur.com/Egsey7M)
+![Here are our findings.](https://imgur.com/Egsey7M)
 
 In addition, based on our findings from R, we found a great deal of quantitative support behind what causes certain comments to be popular or polarizing. Listed below are some of our most notable findings. The accompanying graphs for these results can be found in the r_data_analysis folder. 
 
