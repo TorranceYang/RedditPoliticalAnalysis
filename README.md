@@ -118,7 +118,7 @@ We've linked a couple different analyses upon this data. The R analysis for this
 
 Something fun also did that we generated strictly from this cleaned data is a comment generator/simulator (described in the section below).
 
-![Here are our findings.](https://i.imgur.com/Egsey7M.jpg)
+![Here are our findings.](https://i.imgur.com/uqlq1Gz.jpg)
 
 In addition, based on our findings from R, we found a great deal of quantitative support behind what causes certain comments to be popular or polarizing. Listed below are some of our most notable findings. The accompanying graphs for these results can be found in the r_data_analysis folder. 
 
@@ -150,6 +150,14 @@ Listed below are some of our more notable findings regarding popularity (scores 
 
 
 Again, these findings only demonstrate a snapshot of all the data that was generated from the regression models. To further examine the data and recreate our results, the accompanying r-script is included in r_data_analysis. 
+
+## Conclusion
+
+Generally speaking, polarity is difficult to measure, but on a macro level view, we observed that the site's overall comment sentiments remained relatively the same level over the 3 different years. However, upon viewing specific controversial topics, we discovered some interesting trends. 
+
+In most controversial topics, an increase in positive comments was matched with an increase in negative comments. Some topics, like Russia, were rarely discussed with extreme sentiments before the election, but got more polarized and heated afterwards. 
+
+While it is hard to determine absolutely if Reddit is an echo chamber, we also saw that mentioning a combination of certain topics showed consistent popularity trends among Reddit users. 
 
 ## Replicating Results
 
